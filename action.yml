@@ -1,0 +1,44 @@
+name: 'StyLua'
+description: 'run stylua'
+inputs:
+  path:
+    description: ''
+    required: false
+    default: '.'
+  color:
+    description: ''
+    required: false
+    default: 'always'
+runs:
+  using: "composite"
+  steps:
+    - name: "Install stylua"
+      shell: bash
+      working-directory: ${{ env.RUNNER_TEMP }}
+      run: |
+        echo "::group::Install stylua"
+
+        url=$( \
+          curl -sSL 'https://api.github.com/repos/JohnnyMorganz/StyLua/releases/latest' \
+            | jq -r '.assets[] | select(.name | contains("linux")) | .browser_download_url')
+        curl -sSL "$url" > stylua.zip
+        unzip stylua.zip
+        
+        mkdir -p ~/.local/bin
+        mv stylua ~/.local/bin
+        chmod +x ~/.local/bin/stylua
+
+        stylua --version
+
+        echo "::endgroup::"
+
+    - shell: bash
+      run: |
+        echo "::group::Annotations"
+        stylua --check --color=never ${{ inputs.path }} | ${{ github.action_path }}/parse.js || true
+        echo "::endgroup::"
+
+        stylua --check --color=${{ inputs.color }} ${{ inputs.path }}
+
+
+
