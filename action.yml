@@ -20,7 +20,9 @@ runs:
 
         url=$( \
           curl -sSL 'https://api.github.com/repos/JohnnyMorganz/StyLua/releases/latest' \
-            | jq -r '.assets[] | select(.name | contains("linux")) | .browser_download_url')
+            | jq -r '.assets[] | select(.name | contains("stylua-linux.zip")) | .browser_download_url' \
+            | head -n1 \
+        )
         curl -sSL "$url" > stylua.zip
         unzip stylua.zip
         
